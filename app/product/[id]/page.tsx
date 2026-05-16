@@ -27,7 +27,7 @@ const getColorHex = (colorString: string) => {
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const id = params?.id as string;
+  const id = params.id as string;
   const product = PRODUCTS.find((p) => p.id === id);
   const { addItem, setIsCartOpen } = useCart();
 

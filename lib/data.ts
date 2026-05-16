@@ -22,8 +22,8 @@ export const PRODUCTS: Product[] = [
     price: 4500,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800',
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['White', 'Black'],
@@ -37,8 +37,8 @@ export const PRODUCTS: Product[] = [
     price: 6500,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800',
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Light Blue', 'White', 'Navy'],
@@ -51,7 +51,7 @@ export const PRODUCTS: Product[] = [
     price: 8000,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1489987707023-afc232dce9f2?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['M', 'L', 'XL'],
     colors: ['Washed Blue', 'Black'],
@@ -64,7 +64,7 @@ export const PRODUCTS: Product[] = [
     price: 5000,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1503341455253-b2e723bb3db8?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L'],
     colors: ['Olive', 'Black', 'Charcoal'],
@@ -77,7 +77,7 @@ export const PRODUCTS: Product[] = [
     price: 4800,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1616423640778-28d1b53229bd?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Navy', 'White'],
@@ -90,7 +90,7 @@ export const PRODUCTS: Product[] = [
     price: 5500,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1604176354204-9268737828e4?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['M', 'L', 'XL'],
     colors: ['Red/Black', 'Blue/Grey'],
@@ -103,7 +103,7 @@ export const PRODUCTS: Product[] = [
     price: 2500,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: ['White', 'Black', 'Grey', 'Navy'],
@@ -117,7 +117,7 @@ export const PRODUCTS: Product[] = [
     price: 6000,
     category: 'shirts',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['S', 'M', 'L'],
     colors: ['Beige', 'Light Blue'],
@@ -132,7 +132,7 @@ export const PRODUCTS: Product[] = [
     price: 12000,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1584735174965-99c43a32f6fa?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['7', '8', '9', '10', '11'],
     colors: ['White', 'Off-White'],
@@ -146,7 +146,7 @@ export const PRODUCTS: Product[] = [
     price: 14500,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['6', '7', '8', '9', '10', '11', '12'],
     colors: ['Red/White', 'Black'],
@@ -159,8 +159,8 @@ export const PRODUCTS: Product[] = [
     price: 9500,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800',
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['7', '8', '9', '10', '11'],
     colors: ['Blue/White', 'Neon Green'],
@@ -173,7 +173,7 @@ export const PRODUCTS: Product[] = [
     price: 5500,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['7', '8', '9', '10'],
     colors: ['Black/White', 'White'],
@@ -186,7 +186,7 @@ export const PRODUCTS: Product[] = [
     price: 16000,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['8', '9', '10', '11'],
     colors: ['Tan', 'Black', 'Charcoal'],
@@ -199,7 +199,7 @@ export const PRODUCTS: Product[] = [
     price: 6500,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['7', '8', '9', '10'],
     colors: ['Black/White', 'Navy'],
@@ -212,7 +212,7 @@ export const PRODUCTS: Product[] = [
     price: 11000,
     category: 'shoes',
     images: [
-      'https://picsum.photos/seed/fixed/800/800'
+      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'
     ],
     sizes: ['8', '9', '10', '11', '12'],
     colors: ['White/Grey', 'All Black'],
