@@ -10,7 +10,7 @@ const directUrl = process.env.DATABASE_URL.replace('-pooler.', '.');
 const sql = neon(directUrl);
 
 const ADMIN_EMAIL = 'admin@menace.com';
-const ADMIN_PASSWORD = 'admin12345';
+const ADMIN_PASSWORD = 'admin123';
 const ADMIN_NAME = 'Admin';
 
 async function seedAdmin() {

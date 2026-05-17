@@ -30,7 +30,9 @@ export default auth((req) => {
   if (pathname.startsWith('/admin')) {
     const session = req.auth;
     if (!session?.user) {
-      return NextResponse.redirect(new URL('/login', req.url));
+      const url = new URL('/login', req.url);
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
     }
     if ((session.user as any).role !== 'admin') {
       return NextResponse.redirect(new URL('/', req.url));

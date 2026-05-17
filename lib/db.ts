@@ -10,7 +10,7 @@ const sql = neon(directUrl);
 
 export async function query<T = any>(text: string, params?: unknown[]): Promise<T[]> {
   const res = await (sql as any).query(text, params || []);
-  return res.rows || [];
+  return Array.isArray(res) ? res : (res.rows || []);
 }
 
 export { sql };
