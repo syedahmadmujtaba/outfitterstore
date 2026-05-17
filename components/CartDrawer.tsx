@@ -33,7 +33,7 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto space-y-6">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4 opacity-50">
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400 gap-4 opacity-50">
               <ShoppingBag className="w-8 h-8 stroke-1" />
               <p className="text-[11px] uppercase tracking-[0.15em] font-medium">Bags are empty</p>
               <button 
@@ -44,11 +44,11 @@ export function CartDrawer() {
               </button>
             </div>
           ) : (
-            items.map((item, index) => (
-              <div key={`${item.product.id}-${item.size}-${item.color}-${index}`} className="flex space-x-4 border-b border-black/10 pb-6">
+            items.map((item) => (
+              <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex space-x-4 border-b border-black/10 pb-6">
                 <div className="relative w-16 h-20 bg-gray-200 shrink-0">
                   <Image 
-                    src={item.product.images[0]} 
+                    src={item.product.images[0]?.url || ''} 
                     alt={item.product.name}
                     fill
                     className="object-cover"

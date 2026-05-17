@@ -10,7 +10,6 @@ export default function CheckoutPage() {
   const { items, cartTotal, clearCart } = useCart();
   const [step, setStep] = useState<1 | 2>(1); // 1: Shipping, 2: Payment
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'jazzcash'>('cod');
 
   const tax = cartTotal * 0.18; // 18% GST in PK
   const shipping = cartTotal > 15000 ? 0 : 250;
@@ -121,42 +120,20 @@ export default function CheckoutPage() {
                   <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2 mt-8">
                     Payment
                   </h2>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Choose your preferred payment method.</p>
                   
                   <div className="border border-black/10 bg-white mb-6">
-                    <label className={`p-4 border-b border-black/10 flex items-center gap-3 cursor-pointer transition-colors ${paymentMethod === 'cod' ? 'bg-[#fbfbfb]' : ''}`}>
+                    <div className="p-4 bg-[#fbfbfb] flex items-center gap-3">
                       <input 
                         type="radio" 
                         name="payment" 
                         value="cod" 
-                        checked={paymentMethod === 'cod'} 
-                        onChange={() => setPaymentMethod('cod')}
-                        className="accent-black w-4 h-4 cursor-pointer" 
+                        checked={true}
+                        className="accent-black w-4 h-4" 
                       />
                       <span className="font-bold text-sm uppercase tracking-widest text-[#1a1a1a]">Cash on Delivery (COD)</span>
-                    </label>
-                    <div className={`overflow-hidden transition-all duration-300 ${paymentMethod === 'cod' ? 'max-h-40' : 'max-h-0'}`}>
-                      <div className="p-4 bg-[#fbfbfb] text-sm text-gray-600">
-                        Pay with cash upon delivery.
-                      </div>
                     </div>
-
-                    <label className={`p-4 flex items-center gap-3 cursor-pointer transition-colors ${paymentMethod === 'jazzcash' ? 'bg-[#fbfbfb]' : ''}`}>
-                      <input 
-                        type="radio" 
-                        name="payment" 
-                        value="jazzcash" 
-                        checked={paymentMethod === 'jazzcash'} 
-                        onChange={() => setPaymentMethod('jazzcash')}
-                        className="accent-black w-4 h-4 cursor-pointer" 
-                      />
-                      <span className="font-bold text-sm uppercase tracking-widest text-[#1a1a1a]">JazzCash</span>
-                    </label>
-                    <div className={`overflow-hidden transition-all duration-300 ${paymentMethod === 'jazzcash' ? 'max-h-40' : 'max-h-0 border-t border-black/10'}`}>
-                      <div className="p-4 bg-[#fbfbfb] border-t border-black/10 space-y-4">
-                        <input type="text" placeholder="JazzCash Mobile Account Number" className="w-full border border-black/10 bg-white p-4 text-sm focus:border-black outline-none transition-colors" />
-                        <p className="text-xs text-gray-500">You will receive an authorization prompt on your mobile phone.</p>
-                      </div>
+                    <div className="p-4 text-sm text-gray-600">
+                      Pay with cash upon delivery.
                     </div>
                   </div>
                 </section>
@@ -182,7 +159,7 @@ export default function CheckoutPage() {
             {items.map((item, idx) => (
               <div key={idx} className="flex gap-4">
                 <div className="relative w-16 h-20 bg-[#f4f4f4] border border-black/5 shrink-0">
-                  <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" referrerPolicy="no-referrer" />
+                  <Image src={item.product.images[0]?.url || ''} alt={item.product.name} fill className="object-cover" referrerPolicy="no-referrer" />
                   <span className="absolute -top-2 -right-2 bg-[#1a1a1a] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
                     {item.quantity}
                   </span>

@@ -1,16 +1,54 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getFeaturedProducts } from "@/lib/data";
-import { ProductCard } from "@/components/ProductCard";
 import { ArrowRight } from "lucide-react";
+import { ProductCard } from "@/components/ProductCard";
+import { query } from '@/lib/db';
+import { formatProduct } from '@/lib/format';
 
-export default function Home() {
-  const featuredProducts = getFeaturedProducts();
+async function getFeaturedProducts() {
+  const products = await query(`
+    SELECT
+      p.id,
+      p.name,
+      p.description,
+      p.price,
+      p.category,
+      p.featured,
+      p.new_arrival AS "newArrival",
+      json_agg(
+        json_build_object(
+          'id', pi.id,
+          'url', pi.cloudinary_url,
+          'alt', pi.alt_text,
+          'sortOrder', pi.sort_order
+        ) ORDER BY pi.sort_order
+      ) FILTER (WHERE pi.id IS NOT NULL) AS images,
+      json_agg(
+        json_build_object(
+          'id', pv.id,
+          'size', pv.size,
+          'color', pv.color,
+          'stock', pv.stock
+        )
+      ) FILTER (WHERE pv.id IS NOT NULL) AS variants
+    FROM products p
+    LEFT JOIN product_images pi ON pi.product_id = p.id
+    LEFT JOIN product_variants pv ON pv.product_id = p.id
+    WHERE p.featured = true
+    GROUP BY p.id
+    ORDER BY p.created_at DESC
+    LIMIT 4
+  `);
+
+  return products.map(formatProduct);
+}
+
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts();
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[85vh] min-h-[450px] flex items-center justify-center overflow-hidden">
         <Image
           src="https://picsum.photos/seed/editorialhero/1920/1080"
           alt="Editorial Fashion Campaign"
@@ -21,7 +59,7 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black/30" />
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center mt-20">
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
           <h1 className="text-5xl md:text-7xl lg:text-[7rem] font-bold text-white font-display leading-none mb-6 text-balance">
             Defy Typical<br /><span className="italic font-normal">Silhouettes.</span>
           </h1>
@@ -45,7 +83,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Collection Strip */}
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex items-end justify-between mb-16 pb-4 border-b border-black/10">
           <div>
@@ -73,7 +110,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Large Featured Category Split */}
       <section className="grid grid-cols-1 md:grid-cols-2 border-y border-black/10">
         <div className="relative aspect-square md:aspect-auto md:h-[800px] overflow-hidden group border-b md:border-b-0 md:border-r border-black/10">
           <Image
@@ -116,7 +152,6 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Newsletter */}
       <section className="py-24 bg-white px-4 border-t border-black/10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
           <div className="md:w-1/3">

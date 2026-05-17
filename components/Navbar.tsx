@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import { ShoppingBag, Search, Menu, X, User } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 export function Navbar() {
   const { itemCount, setIsCartOpen } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,7 +22,6 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     if (isMobileMenuOpen) {
       setTimeout(() => setIsMobileMenuOpen(false), 0);
@@ -43,7 +44,6 @@ export function Navbar() {
       >
         <div className="grid grid-cols-3 w-full items-center">
           <div className="flex items-center justify-start">
-             {/* Mobile Menu Button */}
              <button 
                className="lg:hidden p-2 -ml-2 mr-4"
                onClick={() => setIsMobileMenuOpen(true)}
@@ -51,7 +51,6 @@ export function Navbar() {
                <Menu className="w-6 h-6" />
              </button>
 
-            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8 uppercase text-[11px] tracking-[0.2em] font-semibold">
               {navLinks.map((link) => (
                 <Link 
@@ -67,7 +66,6 @@ export function Navbar() {
             </nav>
           </div>
 
-          {/* Logo */}
           <div className="flex items-center justify-center">
             <Link 
               href="/" 
@@ -77,11 +75,22 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center space-x-4 sm:space-x-6 justify-end">
-            <button className="hidden sm:flex text-[11px] items-center justify-center tracking-widest uppercase font-semibold transition-opacity hover:opacity-70 text-[#1a1a1a]">
+            <Link href="/search" className="hidden sm:flex text-[11px] items-center justify-center tracking-widest uppercase font-semibold transition-opacity hover:opacity-70 text-[#1a1a1a]">
               <Search className="w-5 h-5" />
-            </button>
+            </Link>
+            {session?.user ? (
+              <button 
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="hidden sm:flex text-[11px] items-center justify-center tracking-widest uppercase font-semibold transition-opacity hover:opacity-70 text-[#1a1a1a]"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link href="/login" className="hidden sm:flex text-[11px] items-center justify-center tracking-widest uppercase font-semibold transition-opacity hover:opacity-70 text-[#1a1a1a]">
+                <User className="w-5 h-5" />
+              </Link>
+            )}
             <button 
               onClick={() => setIsCartOpen(true)}
               className="text-[11px] flex items-center justify-center tracking-widest uppercase font-semibold relative transition-opacity hover:opacity-70 text-[#1a1a1a]"
@@ -97,9 +106,8 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
       <div 
-        className={`fixed inset-0 bg-white z-50 transform transition-transform duration-300 lg:hidden ${
+        className={`fixed inset-0 bg-white z-50 flex flex-col min-h-screen transform transition-transform duration-300 lg:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -126,12 +134,21 @@ export function Navbar() {
           ))}
         </nav>
         <div className="mt-auto p-6 flex flex-col gap-4 border-t border-black/10">
-          <button className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
-            <User className="w-4 h-4" /> Account
-          </button>
-          <button className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
+          {session?.user ? (
+            <button 
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link href="/login" className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
+              <User className="w-4 h-4" /> Account
+            </Link>
+          )}
+          <Link href="/search" className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
             <Search className="w-4 h-4" /> Search
-          </button>
+          </Link>
         </div>
       </div>
     </>

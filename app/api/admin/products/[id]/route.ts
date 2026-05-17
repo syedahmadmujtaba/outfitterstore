@@ -1,0 +1,98 @@
+import { query } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || (session.user as any).role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const products = await query(`
+    SELECT p.id, p.name, p.description, p.price, p.category, p.featured, p.new_arrival AS "newArrival"
+    FROM products p WHERE p.id = $1
+  `, [id]);
+
+  if (products.length === 0) {
+    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+  }
+
+  const images = await query(
+    `SELECT id, cloudinary_url AS url, alt_text AS alt, sort_order AS sortOrder FROM product_images WHERE product_id = $1 ORDER BY sort_order`,
+    [id]
+  );
+
+  const variants = await query(
+    `SELECT id, size, color, stock FROM product_variants WHERE product_id = $1`,
+    [id]
+  );
+
+  return NextResponse.json({
+    data: {
+      ...products[0],
+      price: parseFloat(products[0].price),
+      images,
+      variants,
+    },
+  });
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || (session.user as any).role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const { name, description, price, category, featured, newArrival, images, variants } = await request.json();
+
+  await query(
+    `UPDATE products SET name = $1, description = $2, price = $3, category = $4, featured = $5, new_arrival = $6, updated_at = NOW() WHERE id = $7`,
+    [name, description, price, category, featured, newArrival, id]
+  );
+
+  await query(`DELETE FROM product_images WHERE product_id = $1`, [id]);
+  if (images && images.length > 0) {
+    for (let i = 0; i < images.length; i++) {
+      await query(
+        `INSERT INTO product_images (product_id, cloudinary_url, alt_text, sort_order) VALUES ($1, $2, $3, $4)`,
+        [id, images[i].url || images[i], name, i]
+      );
+    }
+  }
+
+  await query(`DELETE FROM product_variants WHERE product_id = $1`, [id]);
+  if (variants && variants.length > 0) {
+    for (const v of variants) {
+      await query(
+        `INSERT INTO product_variants (product_id, size, color, stock) VALUES ($1, $2, $3, $4)`,
+        [id, v.size, v.color, v.stock || 0]
+      );
+    }
+  }
+
+  return NextResponse.json({ message: 'Product updated' });
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || (session.user as any).role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await query(`DELETE FROM products WHERE id = $1`, [id]);
+
+  return NextResponse.json({ message: 'Product deleted' });
+}
