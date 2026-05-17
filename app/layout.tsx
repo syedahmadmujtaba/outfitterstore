@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const playfair = Playfair_Display({ subsets: ['latin'], style: ['normal', 'italic'], variable: '--font-display' });
 
 export const metadata: Metadata = {
-  title: 'URBN.OUT | Modern E-Commerce',
+  title: 'MENACE | Modern E-Commerce',
   description: 'A modern e-commerce platform for shirts and shoes inspired by street fashion.',
 };
 

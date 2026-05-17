@@ -71,7 +71,7 @@ export function Navbar() {
               href="/" 
               className="font-display font-bold text-2xl sm:text-3xl tracking-tight uppercase"
             >
-              OUTFITTER
+              MENACE
             </Link>
           </div>
 
@@ -113,7 +113,7 @@ export function Navbar() {
       >
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <Link href="/" className="font-display font-bold text-2xl tracking-tighter uppercase">
-            OUTFITTER
+            MENACE
           </Link>
           <button 
             onClick={() => setIsMobileMenuOpen(false)}

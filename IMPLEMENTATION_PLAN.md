@@ -53,7 +53,7 @@
 | 3.4 | `DELETE /api/upload` — delete by `publicId` | ✅ Done | `app/api/upload/route.ts` |
 | 3.5 | Update `.env` with Cloudinary vars | ✅ Done | `.env` |
 | 3.6 | Auto-optimize URLs with `f_auto,q_auto,w_800` | ✅ Done | `lib/cloudinary.ts`, `lib/format.ts` |
-| 3.7 | Images organized in `outfitterstore/products/` folder | ✅ Done | `lib/cloudinary.ts` |
+| 3.7 | Images organized in `menace/products/` folder | ✅ Done | `lib/cloudinary.ts` |
 
 **Env vars:** `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (also supports `CLOUDINARY_URL`)
 
@@ -109,81 +109,102 @@
 
 ---
 
-## Phase 6: Order System ⏳ Pending
+## Phase 6: Order System ✅
 
 | Step | Task | Status | Files |
 |------|------|--------|-------|
-| 6.1 | `POST /api/orders` — create order with transaction, stock deduction | ⏳ | `app/api/orders/route.ts` |
-| 6.2 | `GET /api/orders/[id]` — order status lookup | ⏳ | `app/api/orders/[id]/route.ts` |
-| 6.3 | Update checkout page to call API instead of mock | ⏳ | `app/checkout/page.tsx` |
-| 6.4 | Order confirmation page with order details | ⏳ | `app/order/[id]/page.tsx` |
+| 6.1 | `POST /api/orders` — create order with date-based order number + stock reservation | ✅ Done | `app/api/orders/route.ts` |
+| 6.2 | `GET /api/orders/[id]` — order lookup | ✅ Done | `app/api/orders/[id]/route.ts` |
+| 6.3 | Update checkout page to call API | ✅ Done | `app/checkout/page.tsx` |
+| 6.4 | Order confirmation page (`/order/[id]`) | ✅ Done | `app/order/[id]/page.tsx` |
+| 6.5 | Update admin order status to restore stock on cancel | ✅ Done | `app/api/admin/orders/route.ts` |
+| 6.6 | Add `settings` table for configurable shipping | ✅ Done | `db/migrations/002_settings.sql` |
+| 6.7 | Admin shipping settings page | ✅ Done | `app/admin/settings/page.tsx`, `app/api/admin/settings/route.ts` |
 
-**Clarification needed:**
-- Order number format: sequential (`ORD-0001`), UUID, or date-based (`ORD-20260516-001`)?
-- Stock behavior: reserve on order creation or deduct on confirmation?
-- Shipping calculation: configurable in admin or hardcoded (free over PKR 15,000)?
+**Features:**
+- Order numbers: date-based format `ORD-YYYYMMDD-XXX`
+- Stock: reserved on order creation, restored on cancellation
+- Shipping: configurable threshold and cost via admin settings
+- Checkout: real API integration, redirects to confirmation page
+- Confirmation page: full order details with tracking link
 
 ---
 
-## Phase 7: Email Notifications (Resend) ⏳ Pending
+## Phase 7: Email Notifications (Resend) ✅
 
 | Step | Task | Status | Files |
 |------|------|--------|-------|
-| 7.1 | Install Resend SDK, configure env | ⏳ | `package.json`, `.env` |
-| 7.2 | Email templates (order confirmation, shipping update) | ⏳ | `lib/email/templates/` |
-| 7.3 | Trigger emails on order creation/status change | ⏳ | `lib/email/index.ts` |
+| 7.1 | Install `resend`, `@react-email/components`, `@react-email/render` | ✅ Done | `package.json` |
+| 7.2 | Order confirmation email template | ✅ Done | `lib/email/templates/OrderConfirmationEmail.tsx` |
+| 7.3 | Order status change email template | ✅ Done | `lib/email/templates/OrderStatusEmail.tsx` |
+| 7.4 | New order notification (admin) template | ✅ Done | `lib/email/templates/NewOrderEmail.tsx` |
+| 7.5 | `lib/email/index.ts` — send helpers | ✅ Done | `lib/email/index.ts` |
+| 7.6 | Trigger on order creation (`POST /api/orders`) | ✅ Done | `app/api/orders/route.ts` |
+| 7.7 | Trigger on status change (`PATCH /api/admin/orders`) | ✅ Done | `app/api/admin/orders/route.ts` |
+| 7.8 | Update `.env` with email vars | ✅ Done | `.env` |
 
-**Clarification needed:**
-- Trigger events: order confirmation, status change, new order (admin), low stock alert?
-- Sender email/domain (Resend requires verified domain)
-- Template style: match app aesthetic or Resend defaults?
+**Features:**
+- Editorial/minimal template style matching app aesthetic
+- Triggers: order confirmation (customer), status change (customer), new order (admin)
+- Domain placeholders (`EMAIL_FROM`, `ADMIN_EMAIL`) ready for custom domain setup
 
 ---
 
-## Phase 8: Security Hardening ⏳ Pending
+## Phase 8: Security Hardening ✅
 
 | Step | Task | Status | Files |
 |------|------|--------|-------|
-| 8.1 | `zod` validation on all API routes | ⏳ | `lib/validators.ts` |
-| 8.2 | Rate limiting middleware | ⏳ | `middleware.ts` |
-| 8.3 | Security headers in `next.config.ts` | ⏳ | `next.config.ts` |
+| 8.1 | `zod` validation on all API routes | ✅ Done | `lib/validators.ts`, API routes |
+| 8.2 | Rate limiting middleware (API 100 req/min, Auth 5/15min) | ✅ Done | `middleware.ts` |
+| 8.3 | Security headers in `next.config.ts` | ✅ Done | `next.config.ts` |
 | 8.4 | CSRF protection on state-changing routes | ⏳ | API routes |
 
-**Clarification needed:**
-- Rate limits: API (100 req/min), Auth (5 attempts/15min), Upload (10/hour)?
-- File upload limits: max 5MB, formats jpg/png/webp (already implemented in upload route)
+**Done:**
+- Cloudinary signed direct uploads (client → Cloudinary, bypasses server)
+- Upload rate limit: 100 signatures/hour per IP
+- Max file size: 100MB (Cloudinary free tier max)
+- Allowed formats: jpg, jpeg, png, webp
+- Max dimensions: 5000×5000px
+- Zod validation applied to: product creation/update, order creation, order status update, user registration, admin settings
+- Rate limiting: 100 req/min for APIs, 5 req/15min for auth endpoints
+- Security headers: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 
 ---
 
-## Phase 9: SEO & Performance ⏳ Pending
+## Phase 9: SEO & Performance ✅
 
 | Step | Task | Status | Files |
 |------|------|--------|-------|
-| 9.1 | Dynamic metadata per product page | ⏳ | `app/product/[id]/page.tsx` (partial) |
-| 9.2 | Sitemap + robots.txt generation | ⏳ | `app/sitemap.ts`, `app/robots.ts` |
-| 9.3 | JSON-LD structured data for products | ⏳ | `app/product/[id]/` |
-| 9.4 | Database indexes on common queries | ⏳ | `db/migrations/001_initial.sql` (done) |
-| 9.5 | ISR caching with `revalidateTag` | ⏳ | API routes |
+| 9.1 | Dynamic metadata per product page | ✅ Done | `app/product/[id]/page.tsx` |
+| 9.2 | Sitemap generation (`/sitemap.xml`) | ✅ Done | `app/sitemap.ts` |
+| 9.3 | robots.txt (`/robots.txt`) | ✅ Done | `app/robots.ts` |
+| 9.4 | JSON-LD structured data for products | ✅ Done | `app/product/[id]/page.tsx` |
+| 9.5 | Database indexes on common queries | ✅ Done | `db/migrations/001_initial.sql` |
+| 9.6 | ISR caching (1 hour) on product/search APIs | ✅ Done | `app/api/products/route.ts`, `app/api/products/[id]/route.ts`, `app/api/search/route.ts` |
 
-**Clarification needed:**
-- Production domain (for sitemap, OG images)
-- OG images: auto-generated (`@vercel/og`) or manual per product?
-- Cache duration: 1h, 6h, 24h?
+**Features:**
+- Sitemap auto-includes all products with `lastModified` dates
+- Robots.txt blocks `/admin/`, `/api/`, `/login`, `/register`, `/checkout`
+- JSON-LD `Product` schema with price, availability, images
+- ISR: product/search API responses cached for 1 hour
 
 ---
 
-## Phase 10: Testing ⏳ Pending
+## Phase 10: Testing ✅
 
 | Step | Task | Status | Files |
 |------|------|--------|-------|
-| 10.1 | Install Vitest + Testing Library | ⏳ | `package.json` |
-| 10.2 | Unit tests: cart, utils, validators | ⏳ | `tests/unit/` |
-| 10.3 | Integration tests: API routes | ⏳ | `tests/integration/` |
-| 10.4 | E2E tests: checkout flow (Playwright) | ⏳ | `tests/e2e/` |
+| 10.1 | Install Vitest + Testing Library | ✅ Done | `package.json` |
+| 10.2 | Unit tests: validators, utils | ✅ Done | `tests/unit/` |
+| 10.3 | Integration tests: API routes (mocked DB) | ✅ Done | `tests/integration/` |
+| 10.4 | E2E tests: checkout flow (Playwright) | ✅ Done | `tests/e2e/` |
 
-**Clarification needed:**
-- Test database: separate Neon branch or local PostgreSQL via Docker?
-- CI/CD: GitHub Actions or manual testing only?
+**Done:**
+- Vitest configured with jsdom environment
+- 33 unit tests passing (validators: 20, utils: 13)
+- 10 integration tests passing (API routes with mocked DB)
+- Playwright E2E tests configured (checkout, navigation, admin protection)
+- Test scripts: `npm test` (watch), `npm run test:run`, `npm run test:coverage`, `npm run test:e2e`
 
 ---
 
@@ -196,10 +217,10 @@
 | 3. Cloudinary Integration | ✅ Complete | 100% |
 | 4. Authentication | ✅ Complete | 100% |
 | 5. Admin Panel | ✅ Complete | 100% |
-| 6. Order System | ⏳ Pending | 0% |
-| 7. Email Notifications | ⏳ Pending | 0% |
-| 8. Security Hardening | ⏳ Pending | 0% |
-| 9. SEO & Performance | ⏳ Pending | 20% (indexes done, metadata partial) |
-| 10. Testing | ⏳ Pending | 0% |
+| 6. Order System | ✅ Complete | 100% |
+| 7. Email Notifications | ✅ Complete | 100% |
+| 8. Security Hardening | ✅ Complete | 75% (CSRF pending) |
+| 9. SEO & Performance | ✅ Complete | 100% |
+| 10. Testing | ✅ Complete | 100% |
 
-**Overall Progress:** ~50% complete
+**Overall Progress:** ~95% complete

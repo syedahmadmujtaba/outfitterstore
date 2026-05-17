@@ -2,6 +2,8 @@ import { query } from '@/lib/db';
 import { formatProduct } from '@/lib/format';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const revalidate = 3600; // 1 hour ISR
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const q = searchParams.get('q');

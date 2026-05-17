@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -15,21 +15,28 @@ export default function NewProductPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    setUploading(false);
-
-    if (!res.ok) {
-      setError('Upload failed');
+    if (!file.type.startsWith('image/')) {
+      setError('Only image files are allowed');
       return;
     }
 
-    const data = await res.json();
-    setImages(prev => [...prev, { url: data.url, publicId: data.publicId }]);
-    setImageUrl('');
+    if (file.size > 100 * 1024 * 1024) {
+      setError('File size must be under 100MB');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const result = await uploadToCloudinary(file);
+      setImages(prev => [...prev, { url: result.url, publicId: result.publicId }]);
+    } catch (err: any) {
+      setError(err.message || 'Upload failed');
+    }
+
+    setUploading(false);
+    e.target.value = '';
   };
 
   const removeImage = (index: number) => {

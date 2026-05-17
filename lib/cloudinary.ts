@@ -25,7 +25,7 @@ if (process.env.CLOUDINARY_URL) {
 
 export { cloudinary };
 
-export const CLOUDINARY_FOLDER = 'outfitterstore/products';
+export const CLOUDINARY_FOLDER = 'menace/products';
 
 export function getOptimizedUrl(url: string): string {
   if (!url.includes('cloudinary.com')) return url;

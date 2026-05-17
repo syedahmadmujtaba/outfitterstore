@@ -1,6 +1,7 @@
 import { query } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { productSchema } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -8,11 +9,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { name, description, price, category, featured, newArrival, images, variants } = await request.json();
+  const body = await request.json();
+  const validation = productSchema.safeParse(body);
 
-  if (!name || !description || !price || !category) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  if (!validation.success) {
+    return NextResponse.json({ error: 'Invalid product data', details: validation.error.issues }, { status: 400 });
   }
+
+  const { name, description, price, category, featured, newArrival, images, variants } = validation.data;
 
   const result = await query(
     `INSERT INTO products (name, description, price, category, featured, new_arrival) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,

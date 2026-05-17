@@ -8,7 +8,7 @@ export function Footer() {
         {/* Logo */}
         <div>
           <Link href="/" className="inline-block transform scale-y-[1.2] origin-left pt-4">
-              <span className="font-display font-medium text-4xl sm:text-6xl md:text-[5.5rem] tracking-tighter text-white">Outfitters</span>
+              <span className="font-display font-medium text-4xl sm:text-6xl md:text-[5.5rem] tracking-tighter text-white">Menace</span>
           </Link>
         </div>
 
@@ -32,7 +32,7 @@ export function Footer() {
 
       <div className="max-w-7xl mx-auto w-full mt-24 text-left md:text-right">
         <p className="text-[10px] font-medium text-gray-400">
-          @ Copyrights Reserved by Outfitters {new Date().getFullYear()}
+          @ Copyrights Reserved by Menace {new Date().getFullYear()}
         </p>
       </div>
     </footer>

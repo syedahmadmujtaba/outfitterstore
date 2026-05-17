@@ -15,8 +15,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const product = products[0];
   return {
-    title: `${product.name} | OUTFITTER`,
+    title: `${product.name} | MENACE`,
     description: product.description,
+  };
+}
+
+function generateJsonLd(product: any) {
+  const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: product.images?.map((img: any) => img.url) || [],
+    sku: product.id,
+    category: product.category,
+    offers: {
+      '@type': 'Offer',
+      price: parseFloat(product.price),
+      priceCurrency: 'PKR',
+      availability: product.variants?.some((v: any) => v.stock > 0)
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      url: `${APP_URL}/product/${product.id}`,
+    },
   };
 }
 
@@ -96,8 +118,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   `, [product.category, id]);
 
   const formattedProduct = formatProduct(product);
-
   const formattedRelated = relatedProducts.map(formatProduct);
 
-  return <ProductDetailClient product={formattedProduct} relatedProducts={formattedRelated} />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateJsonLd(product)) }}
+      />
+      <ProductDetailClient product={formattedProduct} relatedProducts={formattedRelated} />
+    </>
+  );
 }

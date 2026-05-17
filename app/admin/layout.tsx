@@ -34,6 +34,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 Orders
               </a>
             </li>
+            <li>
+              <a href="/admin/settings" className="block px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                Settings
+              </a>
+            </li>
           </ul>
         </nav>
         <main className="flex-1 p-8">

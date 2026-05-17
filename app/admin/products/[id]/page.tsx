@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -47,20 +48,28 @@ export default function EditProductPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    setUploading(false);
-
-    if (!res.ok) {
-      setError('Upload failed');
+    if (!file.type.startsWith('image/')) {
+      setError('Only image files are allowed');
       return;
     }
 
-    const data = await res.json();
-    setImages(prev => [...prev, { url: data.url, publicId: data.publicId }]);
+    if (file.size > 100 * 1024 * 1024) {
+      setError('File size must be under 100MB');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const result = await uploadToCloudinary(file);
+      setImages(prev => [...prev, { url: result.url, publicId: result.publicId }]);
+    } catch (err: any) {
+      setError(err.message || 'Upload failed');
+    }
+
+    setUploading(false);
+    e.target.value = '';
   };
 
   const removeImage = (index: number) => setImages(prev => prev.filter((_, i) => i !== index));

@@ -1,6 +1,7 @@
 import { query } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { productSchema } from '@/lib/validators';
 
 export async function GET(
   _request: NextRequest,
@@ -52,7 +53,14 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const { name, description, price, category, featured, newArrival, images, variants } = await request.json();
+  const body = await request.json();
+  const validation = productSchema.safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json({ error: 'Invalid product data', details: validation.error.issues }, { status: 400 });
+  }
+
+  const { name, description, price, category, featured, newArrival, images, variants } = validation.data;
 
   await query(
     `UPDATE products SET name = $1, description = $2, price = $3, category = $4, featured = $5, new_arrival = $6, updated_at = NOW() WHERE id = $7`,

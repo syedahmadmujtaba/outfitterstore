@@ -1,18 +1,18 @@
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
+import { registerSchema } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    const body = await request.json();
+    const validation = registerSchema.safeParse(body);
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Invalid registration data', details: validation.error.issues }, { status: 400 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
-    }
+    const { email, password, name } = validation.data;
 
     const existing = await query(`SELECT id FROM users WHERE email = $1`, [email]);
     if (existing.length > 0) {
