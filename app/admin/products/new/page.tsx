@@ -64,6 +64,13 @@ export default function NewProductPage() {
       setError('Please add at least one variant (size, color, stock)');
       return;
     }
+
+    for (let i = 0; i < variants.length; i++) {
+      if (!variants[i].color.trim()) {
+        setError(`Variant ${i + 1}: Color is required`);
+        return;
+      }
+    }
     
     setLoading(true);
     setError('');
@@ -90,7 +97,10 @@ export default function NewProductPage() {
 
     if (!res.ok) {
       const err = await res.json();
-      setError(err.error || 'Failed to create product');
+      const msg = err.details
+        ? err.details.map((d: any) => d.message).join(', ')
+        : (err.error || 'Failed to create product');
+      setError(msg);
     } else {
       const result = await res.json();
       console.log('Product created:', result);

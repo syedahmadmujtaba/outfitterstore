@@ -39,7 +39,11 @@ export default function EditProductPage() {
           newArrival: p.newArrival,
         });
         setImages(p.images || []);
-        setVariants(p.variants || []);
+        const normalizeSize = (s: string) => {
+          const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
+          return map[s.toLowerCase()] || s;
+        };
+        setVariants((p.variants || []).map((v: any) => ({ ...v, size: normalizeSize(v.size) })));
         setFetching(false);
       });
   }, [id]);
@@ -74,7 +78,7 @@ export default function EditProductPage() {
 
   const removeImage = (index: number) => setImages(prev => prev.filter((_, i) => i !== index));
 
-  const addVariant = () => setVariants(prev => [...prev, { size: '', color: '', stock: 0 }]);
+  const addVariant = () => setVariants(prev => [...prev, { size: 'S', color: '', stock: 0 }]);
 
   const updateVariant = (index: number, field: string, value: string | number) => {
     setVariants(prev => prev.map((v, i) => i === index ? { ...v, [field]: value } : v));
@@ -95,6 +99,13 @@ export default function EditProductPage() {
       return;
     }
     
+    for (let i = 0; i < variants.length; i++) {
+      if (!variants[i].color.trim()) {
+        setError(`Variant ${i + 1}: Color is required`);
+        return;
+      }
+    }
+    
     setLoading(true);
     setError('');
 
@@ -113,7 +124,10 @@ export default function EditProductPage() {
 
     if (!res.ok) {
       const err = await res.json();
-      setError(err.error || 'Failed to update product');
+      const msg = err.details
+        ? err.details.map((d: any) => d.message).join(', ')
+        : (err.error || 'Failed to update product');
+      setError(msg);
     } else {
       router.push('/admin/products');
     }
