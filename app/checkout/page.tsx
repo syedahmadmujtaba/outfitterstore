@@ -15,24 +15,44 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [contactInfo, setContactInfo] = useState({ email: '', firstName: '', lastName: '', address: '', apartment: '', city: '', province: '' });
+
+  const normalizeSize = (s: string) => {
+    const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
+    return map[s.toLowerCase()] || s;
+  };
 
   const tax = cartTotal * 0.18;
   const shipping = cartTotal > 15000 ? 0 : 250;
   const finalTotal = cartTotal + tax + shipping;
+
+  const handleContinue = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setContactInfo({
+      email: formData.get('email') as string,
+      firstName: formData.get('firstName') as string,
+      lastName: formData.get('lastName') as string,
+      address: formData.get('address') as string,
+      apartment: formData.get('apartment') as string || '',
+      city: formData.get('city') as string,
+      province: formData.get('province') as string,
+    });
+    setStep(2);
+  };
 
   const handleComplete = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const formData = new FormData(e.currentTarget);
     const shippingAddress = {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      address: formData.get('address'),
-      apartment: formData.get('apartment'),
-      city: formData.get('city'),
-      province: formData.get('province'),
+      firstName: contactInfo.firstName,
+      lastName: contactInfo.lastName,
+      address: contactInfo.address,
+      apartment: contactInfo.apartment,
+      city: contactInfo.city,
+      province: contactInfo.province,
     };
 
     const orderItems = items.map(item => ({
@@ -48,7 +68,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: formData.get('email'),
+          email: contactInfo.email,
           items: orderItems,
           shippingAddress,
           paymentMethod: 'cod',
@@ -92,7 +112,7 @@ export default function CheckoutPage() {
             <span className={step === 2 ? 'text-[#1a1a1a]' : ''}>Payment</span>
           </nav>
 
-          <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleComplete}>
+          <form onSubmit={step === 1 ? handleContinue : handleComplete}>
             {step === 1 ? (
               <div className="space-y-8">
                 {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">{error}</div>}
@@ -138,13 +158,13 @@ export default function CheckoutPage() {
                 <section className="bg-[#fbfbfb] p-6 border border-black/10 text-sm">
                   <div className="flex justify-between flex-wrap gap-2 mb-4">
                     <span className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Contact</span>
-                    <span className="font-semibold text-xs">customer@example.com</span>
+                    <span className="font-semibold text-xs">{contactInfo.email}</span>
                     <button type="button" onClick={() => setStep(1)} className="text-[10px] font-bold uppercase tracking-widest text-gray-400 underline hover:text-[#1a1a1a]">Change</button>
                   </div>
                   <div className="w-full h-px bg-black/10 mb-4" />
                   <div className="flex justify-between flex-wrap gap-2">
                     <span className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Ship to</span>
-                    <span className="font-semibold text-xs">123 Fashion Blvd, NY, 10001</span>
+                    <span className="font-semibold text-xs">{contactInfo.address}, {contactInfo.city}, {contactInfo.province}</span>
                     <button type="button" onClick={() => setStep(1)} className="text-[10px] font-bold uppercase tracking-widest text-gray-400 underline hover:text-[#1a1a1a]">Change</button>
                   </div>
                 </section>
@@ -153,7 +173,7 @@ export default function CheckoutPage() {
                   <h2 className="text-xl font-display font-bold mb-4 mt-8">Payment</h2>
                   <div className="border border-black/10 bg-white mb-6">
                     <div className="p-4 bg-[#fbfbfb] flex items-center gap-3">
-                      <input type="radio" name="payment" value="cod" checked className="accent-black w-4 h-4" />
+                      <input type="radio" name="payment" value="cod" defaultChecked className="accent-black w-4 h-4" />
                       <span className="font-bold text-sm uppercase tracking-widest text-[#1a1a1a]">Cash on Delivery (COD)</span>
                     </div>
                     <div className="p-4 text-sm text-gray-600">Pay with cash upon delivery.</div>
@@ -184,7 +204,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex-1 text-[12px] py-1">
                   <h3 className="font-bold uppercase leading-tight tracking-wide">{item.product.name}</h3>
-                  <p className="text-gray-400 mt-1 uppercase tracking-tighter text-[10px]">{item.color} / {item.size}</p>
+                  <p className="text-gray-400 mt-1 uppercase tracking-tighter text-[10px]">{item.color} / {normalizeSize(item.size)}</p>
                 </div>
                 <div className="text-sm py-1 font-semibold">PKR {(item.product.price * item.quantity).toLocaleString()}</div>
               </div>

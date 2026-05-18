@@ -84,6 +84,17 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (images.length === 0) {
+      setError('Please upload at least one image');
+      return;
+    }
+    
+    if (variants.length === 0) {
+      setError('Please add at least one variant (size, color, stock)');
+      return;
+    }
+    
     setLoading(true);
     setError('');
 
@@ -187,7 +198,12 @@ export default function EditProductPage() {
           </div>
           {variants.map((v, i) => (
             <div key={i} className="flex gap-2 mb-2 items-center">
-              <input placeholder="Size" value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none" />
+              <select value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none">
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
               <input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-24 focus:border-black outline-none" />
               <input type="number" placeholder="Stock" value={v.stock} onChange={e => updateVariant(i, 'stock', parseInt(e.target.value) || 0)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none" />
               <button type="button" onClick={() => removeVariant(i)} className="text-red-500 text-sm">×</button>

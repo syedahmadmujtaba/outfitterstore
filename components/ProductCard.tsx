@@ -13,8 +13,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const imageUrl = product.images?.[0]?.url || '';
   const secondaryImageUrl = product.images?.[1]?.url || '';
 
-  if (!imageUrl) return null;
-
   return (
     <Link href={`/product/${product.id}`} className="group block">
       <div className="relative aspect-[3/4] bg-[#f4f4f4] mb-4 overflow-hidden border border-black/5">
@@ -25,14 +23,20 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
         )}
-        <Image 
-          src={imageUrl} 
-          alt={product.name}
-          fill
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-          referrerPolicy="no-referrer"
-        />
-        {secondaryImageUrl && (
+        {imageUrl ? (
+          <Image 
+            src={imageUrl} 
+            alt={product.name}
+            fill
+            className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+            No image
+          </div>
+        )}
+        {imageUrl && secondaryImageUrl && (
            <Image 
              src={secondaryImageUrl} 
              alt={`${product.name} alternate view`}

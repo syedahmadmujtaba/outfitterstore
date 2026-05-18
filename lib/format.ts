@@ -9,7 +9,9 @@ export function formatProduct(p: any) {
     category: p.category,
     featured: p.featured,
     newArrival: p.new_arrival,
-    images: (p.images || []).map((img: any) => ({
+    images: (p.images || [])
+    .filter((img: any) => img && img.url)
+    .map((img: any) => ({
       ...img,
       url: getOptimizedUrl(img.url),
     })),

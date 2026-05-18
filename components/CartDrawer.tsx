@@ -9,6 +9,11 @@ import Link from 'next/link';
 export function CartDrawer() {
   const { isCartOpen, setIsCartOpen, items, updateQuantity, removeItem, cartTotal } = useCart();
 
+  const normalizeSize = (s: string) => {
+    const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
+    return map[s.toLowerCase()] || s;
+  };
+
   if (!isCartOpen) return null;
 
   return (
@@ -60,7 +65,7 @@ export function CartDrawer() {
                     <div>
                       <div className="text-[12px] font-bold uppercase leading-tight">{item.product.name}</div>
                       <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">
-                        Size: {item.size} / Color: {item.color}
+                        Size: {normalizeSize(item.size)} / Color: {item.color}
                       </div>
                     </div>
                     <button 

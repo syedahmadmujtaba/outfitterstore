@@ -38,11 +38,6 @@ export async function POST(request: NextRequest) {
   const paramsToSign = {
     timestamp,
     folder: 'menace/products',
-    allowed_formats: 'jpg,jpeg,png,webp',
-    max_file_size: 104857600, // 100MB (Cloudinary free tier max)
-    max_image_width: 5000,
-    max_image_height: 5000,
-    overwrite: false,
   };
 
   const signature = cloudinary.utils.api_sign_request(
@@ -56,7 +51,5 @@ export async function POST(request: NextRequest) {
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
     folder: paramsToSign.folder,
-    allowedFormats: paramsToSign.allowed_formats,
-    maxFileSize: paramsToSign.max_file_size,
   });
 }

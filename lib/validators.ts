@@ -12,10 +12,10 @@ export const productSchema = z.object({
     publicId: z.string().optional(),
   })).min(1),
   variants: z.array(z.object({
-    size: z.string().min(1),
+    size: z.enum(['S', 'M', 'L', 'XL']),
     color: z.string().min(1),
     stock: z.number().int().min(0).default(0),
-  })).optional().default([]),
+  })).min(1),
 });
 
 export const orderSchema = z.object({

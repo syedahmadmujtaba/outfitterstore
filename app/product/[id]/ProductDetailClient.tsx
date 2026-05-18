@@ -20,6 +20,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const sizes = [...new Set(product.variants?.map(v => v.size) || [])];
   const colors = [...new Set(product.variants?.map(v => v.color) || [])];
 
+  const normalizeSize = (s: string) => {
+    const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
+    return map[s.toLowerCase()] || s;
+  };
+
+  const displaySizes = sizes.map(normalizeSize);
+
   const [selectedSize, setSelectedSize] = useState<string>(sizes[0] || '');
   const [selectedColor, setSelectedColor] = useState<string>(colors[0] || '');
   const [error, setError] = useState('');
@@ -42,27 +49,33 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     setExpandedSection(prev => prev === section ? null : section);
   };
 
-  const imageUrls = product.images?.map(img => img.url) || [];
-  const displayImages = [...imageUrls, ...imageUrls, ...imageUrls].slice(0, 4);
+  const imageUrls = product.images?.filter(img => img.url).map(img => img.url) || [];
+  const displayImages = imageUrls.length > 0 ? [...imageUrls, ...imageUrls, ...imageUrls].slice(0, 4) : [];
 
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row min-h-screen">
         <div className="w-full lg:w-[65%] xl:w-[70%]">
-          <div className="grid grid-cols-2 gap-1 p-1">
-            {displayImages.map((img, idx) => (
-              <div key={idx} className="relative aspect-[3/4] bg-[#f4f4f4]">
-                <Image 
-                  src={img} 
-                  alt={`${product.name} view ${idx + 1}`} 
-                  fill 
-                  className="object-cover object-center"
-                  priority={idx < 2}
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            ))}
-          </div>
+          {displayImages.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1 p-1">
+              {displayImages.map((img, idx) => (
+                <div key={idx} className="relative aspect-[3/4] bg-[#f4f4f4]">
+                  <Image 
+                    src={img} 
+                    alt={`${product.name} view ${idx + 1}`} 
+                    fill 
+                    className="object-cover object-center"
+                    priority={idx < 2}
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="aspect-[3/4] bg-[#f4f4f4] flex items-center justify-center">
+              <p className="text-gray-400 text-sm">No images available</p>
+            </div>
+          )}
         </div>
 
         <div className="w-full lg:w-[35%] xl:w-[30%] px-6 py-10 lg:py-12 lg:px-12">
@@ -100,17 +113,17 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 <button className="text-[10px] font-semibold underline uppercase tracking-widest text-[#1a1a1a]">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-4">
-                {sizes.map(size => (
+                {displaySizes.map((displaySize, idx) => (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
+                    key={idx}
+                    onClick={() => setSelectedSize(sizes[idx])}
                     className={`text-[12px] uppercase transition-all ${
-                      selectedSize === size 
-                        ? 'text-[#1a1a1a] font-bold underline underline-offset-4' 
+                      selectedSize === sizes[idx]
+                        ? 'text-[#1a1a1a] font-bold underline underline-offset-4'
                         : 'text-gray-500 hover:text-[#1a1a1a] font-medium'
                     }`}
                   >
-                    {size}
+                    {displaySize}
                   </button>
                 ))}
               </div>

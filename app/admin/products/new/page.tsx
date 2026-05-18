@@ -9,6 +9,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [variants, setVariants] = useState<{ size: string; color: string; stock: number }[]>([]);
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,8 +44,27 @@ export default function NewProductPage() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const addVariant = () => setVariants(prev => [...prev, { size: 'S', color: '', stock: 0 }]);
+
+  const updateVariant = (index: number, field: string, value: string | number) => {
+    setVariants(prev => prev.map((v, i) => i === index ? { ...v, [field]: value } : v));
+  };
+
+  const removeVariant = (index: number) => setVariants(prev => prev.filter((_, i) => i !== index));
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (images.length === 0) {
+      setError('Please upload at least one image');
+      return;
+    }
+    
+    if (variants.length === 0) {
+      setError('Please add at least one variant (size, color, stock)');
+      return;
+    }
+    
     setLoading(true);
     setError('');
 
@@ -57,7 +77,7 @@ export default function NewProductPage() {
       featured: formData.get('featured') === 'on',
       newArrival: formData.get('newArrival') === 'on',
       images,
-      variants: [],
+      variants,
     };
 
     const res = await fetch('/api/admin/products', {
@@ -72,6 +92,8 @@ export default function NewProductPage() {
       const err = await res.json();
       setError(err.error || 'Failed to create product');
     } else {
+      const result = await res.json();
+      console.log('Product created:', result);
       router.push('/admin/products');
     }
   };
@@ -142,6 +164,27 @@ export default function NewProductPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Variants (Size / Color / Stock)</label>
+            <button type="button" onClick={addVariant} className="text-[10px] uppercase tracking-widest text-blue-600 hover:underline">+ Add Variant</button>
+          </div>
+          {variants.length === 0 && <p className="text-xs text-gray-400 mb-3">At least one variant is required</p>}
+          {variants.map((v, i) => (
+            <div key={i} className="flex gap-2 mb-2 items-center">
+              <select value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none">
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
+              <input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-24 focus:border-black outline-none" />
+              <input type="number" placeholder="Stock" value={v.stock} onChange={e => updateVariant(i, 'stock', parseInt(e.target.value) || 0)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none" />
+              <button type="button" onClick={() => removeVariant(i)} className="text-red-500 text-sm">×</button>
+            </div>
+          ))}
         </div>
 
         <button type="submit" disabled={loading} className="w-full bg-black text-white py-5 text-[11px] uppercase tracking-widest font-bold hover:opacity-85 transition-opacity disabled:opacity-50">
