@@ -1,16 +1,11 @@
 import { Resend } from 'resend';
-import { render } from '@react-email/render';
 import { OrderConfirmationEmail } from './templates/OrderConfirmationEmail';
 import { OrderStatusEmail } from './templates/OrderStatusEmail';
 import { NewOrderEmail } from './templates/NewOrderEmail';
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not set');
-}
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@yourdomain.com';
+const FROM_EMAIL = `Menace <${process.env.EMAIL_FROM || 'onboarding@resend.dev'}>`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@yourdomain.com';
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
@@ -24,22 +19,30 @@ interface SendOrderConfirmationParams {
 }
 
 export async function sendOrderConfirmation({ to, name, orderNumber, items, total, orderId }: SendOrderConfirmationParams) {
-  const html = await render(
-    <OrderConfirmationEmail
-      orderNumber={orderNumber}
-      customerName={name}
-      items={items}
-      total={total}
-      trackingUrl={`${APP_URL}/order/${orderId}`}
-    />
-  );
+  if (!resend) {
+    console.warn('Email service not configured - RESEND_API_KEY missing');
+    return;
+  }
 
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
     subject: `Order Confirmed #${orderNumber}`,
-    html,
+    react: OrderConfirmationEmail({
+      orderNumber,
+      customerName: name,
+      items,
+      total,
+      trackingUrl: `${APP_URL}/order/${orderId}`,
+    }),
   });
+
+  if (error) {
+    console.error('Resend error (sendOrderConfirmation):', error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }
 
 interface SendOrderStatusParams {
@@ -52,22 +55,30 @@ interface SendOrderStatusParams {
 }
 
 export async function sendOrderStatus({ to, name, orderNumber, oldStatus, newStatus, orderId }: SendOrderStatusParams) {
-  const html = await render(
-    <OrderStatusEmail
-      orderNumber={orderNumber}
-      customerName={name}
-      oldStatus={oldStatus}
-      newStatus={newStatus}
-      trackingUrl={`${APP_URL}/order/${orderId}`}
-    />
-  );
+  if (!resend) {
+    console.warn('Email service not configured - RESEND_API_KEY missing');
+    return;
+  }
 
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
     subject: `Order #${orderNumber} Status Updated`,
-    html,
+    react: OrderStatusEmail({
+      orderNumber,
+      customerName: name,
+      oldStatus,
+      newStatus,
+      trackingUrl: `${APP_URL}/order/${orderId}`,
+    }),
   });
+
+  if (error) {
+    console.error('Resend error (sendOrderStatus):', error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }
 
 interface SendNewOrderParams {
@@ -79,20 +90,28 @@ interface SendNewOrderParams {
 }
 
 export async function sendNewOrderNotification({ orderNumber, email, items, total, orderId }: SendNewOrderParams) {
-  const html = await render(
-    <NewOrderEmail
-      orderNumber={orderNumber}
-      email={email}
-      items={items}
-      total={total}
-      adminUrl={`${APP_URL}/admin/orders/${orderId}`}
-    />
-  );
+  if (!resend) {
+    console.warn('Email service not configured - RESEND_API_KEY missing');
+    return;
+  }
 
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_EMAIL,
     subject: `New Order #${orderNumber}`,
-    html,
+    react: NewOrderEmail({
+      orderNumber,
+      email,
+      items,
+      total,
+      adminUrl: `${APP_URL}/admin/orders/${orderId}`,
+    }),
   });
+
+  if (error) {
+    console.error('Resend error (sendNewOrderNotification):', error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }
