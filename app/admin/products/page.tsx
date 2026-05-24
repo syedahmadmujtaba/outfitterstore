@@ -4,12 +4,9 @@ import Link from 'next/link';
 export default async function AdminProducts() {
   const products = await query(`
     SELECT p.id, p.name, p.category, p.price, p.featured, p.new_arrival AS "newArrival",
-           COUNT(DISTINCT pi.id) AS image_count,
-           COUNT(DISTINCT pv.id) AS variant_count
+           (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id = p.id) AS image_count,
+           (SELECT COUNT(*) FROM product_variants pv WHERE pv.product_id = p.id) AS variant_count
     FROM products p
-    LEFT JOIN product_images pi ON pi.product_id = p.id
-    LEFT JOIN product_variants pv ON pv.product_id = p.id
-    GROUP BY p.id
     ORDER BY p.created_at DESC
   `);
 

@@ -1,30 +1,13 @@
 import { cloudinary } from '@/lib/cloudinary';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkDbRateLimit } from '@/lib/rate-limit';
 
-const rateLimit = new Map<string, { count: number; resetAt: number }>();
 const MAX_REQUESTS = 100;
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
-function getRateLimit(ip: string) {
-  const now = Date.now();
-  const entry = rateLimit.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimit.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_REQUESTS - 1 };
-  }
-
-  entry.count++;
-  if (entry.count > MAX_REQUESTS) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  return { allowed: true, remaining: MAX_REQUESTS - entry.count };
-}
-
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'unknown';
-  const limit = getRateLimit(ip);
+  const limit = await checkDbRateLimit(`upload:${ip}`, { maxRequests: MAX_REQUESTS, windowMs: WINDOW_MS });
 
   if (!limit.allowed) {
     return NextResponse.json(

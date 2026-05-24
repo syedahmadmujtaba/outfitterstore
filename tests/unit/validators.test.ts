@@ -22,6 +22,7 @@ describe('productSchema', () => {
       price: 100,
       category: 'shirts',
       images: [{ url: 'https://example.com/img.jpg' }],
+      variants: [{ size: 'M', color: 'Blue', stock: 5 }],
     };
     const result = productSchema.safeParse(invalid);
     expect(result.success).toBe(false);
@@ -34,6 +35,7 @@ describe('productSchema', () => {
       price: -10,
       category: 'shirts',
       images: [{ url: 'https://example.com/img.jpg' }],
+      variants: [{ size: 'M', color: 'Blue', stock: 5 }],
     };
     const result = productSchema.safeParse(invalid);
     expect(result.success).toBe(false);
@@ -46,6 +48,7 @@ describe('productSchema', () => {
       price: 100,
       category: 'invalid',
       images: [{ url: 'https://example.com/img.jpg' }],
+      variants: [{ size: 'M', color: 'Blue', stock: 5 }],
     };
     const result = productSchema.safeParse(invalid);
     expect(result.success).toBe(false);
@@ -58,6 +61,7 @@ describe('productSchema', () => {
       price: 100,
       category: 'shirts',
       images: [],
+      variants: [{ size: 'M', color: 'Blue', stock: 5 }],
     };
     const result = productSchema.safeParse(invalid);
     expect(result.success).toBe(false);
@@ -70,6 +74,7 @@ describe('productSchema', () => {
       price: 100,
       category: 'shirts',
       images: [{ url: 'https://example.com/img.jpg' }],
+      variants: [{ size: 'M', color: 'Blue', stock: 5 }],
     };
     const result = productSchema.safeParse(product);
     expect(result.success).toBe(true);

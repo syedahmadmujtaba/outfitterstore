@@ -4,10 +4,8 @@ import Link from 'next/link';
 export default async function AdminOrders() {
   const orders = await query(`
     SELECT o.id, o.order_number AS "orderNumber", o.email, o.status, o.total, o.payment_method AS "paymentMethod", o.created_at AS "createdAt",
-           COUNT(oi.id) AS item_count
+           (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
     FROM orders o
-    LEFT JOIN order_items oi ON oi.order_id = o.id
-    GROUP BY o.id
     ORDER BY o.created_at DESC
   `);
 

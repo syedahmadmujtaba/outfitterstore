@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -16,28 +16,61 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [contactInfo, setContactInfo] = useState({ email: '', firstName: '', lastName: '', address: '', apartment: '', city: '', province: '' });
+  const [shippingThreshold, setShippingThreshold] = useState(15000);
+  const [shippingCost, setShippingCost] = useState(250);
+
+  useEffect(() => {
+    fetch('/api/shipping-settings')
+      .then(res => res.json())
+      .then(data => {
+        setShippingThreshold(data.shippingThreshold);
+        setShippingCost(data.shippingCost);
+      })
+      .catch(() => {
+        // fall back to defaults
+      });
+  }, []);
 
   const normalizeSize = (s: string) => {
     const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
     return map[s.toLowerCase()] || s;
   };
 
+  const provinceLabels: Record<string, string> = {
+    sindh: 'Sindh',
+    punjab: 'Punjab',
+    balochistan: 'Balochistan',
+    kpk: 'Khyber Pakhtunkhwa',
+    islamabad: 'Islamabad',
+    ajk: 'AJK',
+    gb: 'Gilgit Baltistan',
+  };
+
   const tax = cartTotal * 0.18;
-  const shipping = cartTotal > 15000 ? 0 : 250;
+  const shipping = cartTotal >= shippingThreshold ? 0 : shippingCost;
   const finalTotal = cartTotal + tax + shipping;
 
   const handleContinue = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
     const formData = new FormData(e.currentTarget);
-    setContactInfo({
-      email: formData.get('email') as string,
-      firstName: formData.get('firstName') as string,
-      lastName: formData.get('lastName') as string,
-      address: formData.get('address') as string,
-      apartment: formData.get('apartment') as string || '',
-      city: formData.get('city') as string,
-      province: formData.get('province') as string,
-    });
+    const email = formData.get('email') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+    const address = formData.get('address') as string;
+    const city = formData.get('city') as string;
+    const province = formData.get('province') as string;
+
+    if (!email || !firstName || !lastName || !address || !city || !province) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setContactInfo({ email, firstName, lastName, address, apartment: formData.get('apartment') as string || '', city, province });
     setStep(2);
   };
 
@@ -164,7 +197,7 @@ export default function CheckoutPage() {
                   <div className="w-full h-px bg-black/10 mb-4" />
                   <div className="flex justify-between flex-wrap gap-2">
                     <span className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Ship to</span>
-                    <span className="font-semibold text-xs">{contactInfo.address}, {contactInfo.city}, {contactInfo.province}</span>
+                    <span className="font-semibold text-xs">{contactInfo.address}, {contactInfo.city}, {provinceLabels[contactInfo.province] || contactInfo.province}</span>
                     <button type="button" onClick={() => setStep(1)} className="text-[10px] font-bold uppercase tracking-widest text-gray-400 underline hover:text-[#1a1a1a]">Change</button>
                   </div>
                 </section>

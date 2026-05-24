@@ -5,10 +5,12 @@ import { useCart } from '@/lib/cart-context';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function CartDrawer() {
   const { isCartOpen, setIsCartOpen, items, updateQuantity, removeItem, cartTotal } = useCart();
 
+  const router = useRouter();
   const normalizeSize = (s: string) => {
     const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
     return map[s.toLowerCase()] || s;
@@ -38,11 +40,11 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto space-y-6">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400 gap-4 opacity-50">
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400 gap-4">
               <ShoppingBag className="w-8 h-8 stroke-1" />
               <p className="text-[11px] uppercase tracking-[0.15em] font-medium">Bags are empty</p>
               <button 
-                onClick={() => setIsCartOpen(false)}
+                onClick={() => { setIsCartOpen(false); router.push('/products'); }}
                 className="mt-4 px-6 py-3 border border-black text-[#1a1a1a] uppercase text-[10px] tracking-widest font-bold hover:bg-black hover:text-white transition-colors"
               >
                 Continue Browsing
@@ -77,17 +79,17 @@ export function CartDrawer() {
                   </div>
                   
                   <div className="mt-auto flex justify-between items-center">
-                    <div className="flex items-center gap-3 opacity-60">
+                    <div className="flex items-center gap-3">
                       <button 
                         onClick={() => updateQuantity(item.product.id, item.size, item.color, item.quantity - 1)}
-                        className="hover:opacity-50 transition-colors"
+                        className="text-gray-400 hover:text-black transition-colors"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
                       <span className="text-[10px] font-bold w-4 text-center">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.product.id, item.size, item.color, item.quantity + 1)}
-                        className="hover:opacity-50 transition-colors"
+                        className="text-gray-400 hover:text-black transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                       </button>

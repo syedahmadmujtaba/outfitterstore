@@ -1,6 +1,7 @@
 import { query } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { settingsSchema } from '@/lib/validators';
 
 export async function GET() {
   const session = await auth();
@@ -23,10 +24,17 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { shipping_threshold, shipping_cost } = await request.json();
+  const body = await request.json();
+  const validation = settingsSchema.safeParse(body);
 
-  await query(`UPDATE settings SET value = $1, updated_at = NOW() WHERE key = 'shipping_threshold'`, [shipping_threshold]);
-  await query(`UPDATE settings SET value = $1, updated_at = NOW() WHERE key = 'shipping_cost'`, [shipping_cost]);
+  if (!validation.success) {
+    return NextResponse.json({ error: 'Invalid settings data', details: validation.error.issues }, { status: 400 });
+  }
+
+  const { shipping_threshold, shipping_cost } = validation.data;
+
+  await query(`UPDATE settings SET value = $1, updated_at = NOW() WHERE key = 'shipping_threshold'`, [String(shipping_threshold)]);
+  await query(`UPDATE settings SET value = $1, updated_at = NOW() WHERE key = 'shipping_cost'`, [String(shipping_cost)]);
 
   return NextResponse.json({ message: 'Settings updated' });
 }

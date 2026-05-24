@@ -12,19 +12,10 @@ export function Footer() {
           </Link>
         </div>
 
-        {/* Links Array */}
+        {/* Links */}
         <div className="flex gap-16 md:gap-32 w-full md:w-auto mt-4 md:mt-0 justify-start md:justify-end">
           <div className="flex flex-col gap-4 text-[12px] md:text-right font-medium text-gray-200">
-            <Link href="#" className="hover:text-white transition-colors">Shopping Guide</Link>
-            <Link href="#" className="hover:text-white transition-colors">Log In/Sign Up</Link>
-            <Link href="#" className="hover:text-white transition-colors">Exchange & Returns</Link>
-            <Link href="#" className="hover:text-white transition-colors">Shipping & Deliveries</Link>
-            <Link href="#" className="hover:text-white transition-colors">How To Buy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Payment</Link>
-          </div>
-          <div className="flex flex-col gap-4 text-[12px] md:text-right font-medium text-gray-200">
-            <Link href="#" className="hover:text-white transition-colors">About Us</Link>
-            <Link href="#" className="hover:text-white transition-colors">Retail Stores</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Log In/Sign Up</Link>
             <Link href="#" className="hover:text-white transition-colors">Contact Us</Link>
           </div>
         </div>

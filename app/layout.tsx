@@ -12,7 +12,7 @@ const playfair = Playfair_Display({ subsets: ['latin'], style: ['normal', 'itali
 
 export const metadata: Metadata = {
   title: 'MENACE | Modern E-Commerce',
-  description: 'A modern e-commerce platform for shirts and shoes inspired by street fashion.',
+  description: 'A modern e-commerce platform for shirts and accessories inspired by street fashion.',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {

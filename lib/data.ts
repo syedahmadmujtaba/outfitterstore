@@ -45,9 +45,4 @@ export interface SearchResponse {
   };
 }
 
-export function formatPrice(price: number): string {
-  if (price % 1 === 0) {
-    return price.toLocaleString();
-  }
-  return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+

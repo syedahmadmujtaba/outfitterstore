@@ -6,7 +6,7 @@ import { orderSchema } from '@/lib/validators';
 function generateOrderNumber(): string {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const random = Math.floor(Math.random() * 900 + 100);
+  const random = crypto.randomUUID().split('-')[0].toUpperCase();
   return `ORD-${dateStr}-${random}`;
 }
 
@@ -61,17 +61,29 @@ export async function POST(request: NextRequest) {
       );
 
       // Reserve stock (deduct immediately but will be restored if cancelled)
-      await query(
+      const stockResult = await query(
         `UPDATE product_variants SET stock = stock - $1
-         WHERE product_id = $2 AND size = $3 AND color = $4 AND stock >= $1`,
+         WHERE product_id = $2 AND size = $3 AND color = $4 AND stock >= $1
+         RETURNING stock`,
         [item.quantity, item.productId, item.size, item.color]
       );
+
+      if (stockResult.length === 0) {
+        // Insufficient stock — delete the order and return an error
+        await query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+        await query(`DELETE FROM orders WHERE id = $1`, [orderId]);
+        return NextResponse.json({ error: `Insufficient stock for variant ${item.size}/${item.color}` }, { status: 409 });
+      }
     }
 
     // Send confirmation emails (non-blocking)
     try {
+      const productIds = [...new Set(items.map(item => item.productId))];
+      const productNames = await query(`SELECT id, name FROM products WHERE id = ANY($1::uuid[])`, [productIds]);
+      const nameMap = Object.fromEntries(productNames.map((p: any) => [p.id, p.name]));
+
       const emailItems = items.map((item: any) => ({
-        name: item.productName || 'Product',
+        name: nameMap[item.productId] || 'Product',
         quantity: item.quantity,
         price: item.price,
       }));

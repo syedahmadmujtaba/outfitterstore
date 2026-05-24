@@ -12,6 +12,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const colors = [...new Set(product.variants?.map(v => v.color) || [])];
   const imageUrl = product.images?.[0]?.url || '';
   const secondaryImageUrl = product.images?.[1]?.url || '';
+  const totalStock = product.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
+  const isOutOfStock = totalStock === 0;
+  const isLowStock = totalStock > 0 && totalStock <= 5;
 
   return (
     <Link href={`/product/${product.id}`} className="group block">
@@ -20,6 +23,20 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="absolute top-4 left-4 z-10">
             <span className="bg-white text-black border border-black/10 text-[9px] font-bold uppercase tracking-widest px-2 py-1">
               New
+            </span>
+          </div>
+        )}
+        {isOutOfStock && (
+          <div className="absolute top-4 right-4 z-10">
+            <span className="bg-black text-white text-[9px] font-bold uppercase tracking-widest px-2 py-1">
+              Sold Out
+            </span>
+          </div>
+        )}
+        {isLowStock && !isOutOfStock && (
+          <div className="absolute top-4 right-4 z-10">
+            <span className="bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-1">
+              Low Stock
             </span>
           </div>
         )}
@@ -41,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
              src={secondaryImageUrl} 
              alt={`${product.name} alternate view`}
              fill
-             className="object-cover object-center absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
+             className="object-cover object-center absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 max-lg:hidden"
              referrerPolicy="no-referrer"
            />
         )}

@@ -100,11 +100,18 @@ export default async function AllProductsPage({
         <SortDropdown defaultSort={sort || 'newest'} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-        {formattedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {formattedProducts.length === 0 ? (
+        <div className="text-center py-32">
+          <p className="text-[11px] uppercase tracking-[0.15em] text-gray-400 font-medium">No products found</p>
+          <p className="text-[10px] text-gray-300 mt-2">Try adjusting your filters.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+          {formattedProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

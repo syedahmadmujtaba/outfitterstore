@@ -2,6 +2,9 @@ import { query } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { productSchema } from '@/lib/validators';
+import { z } from 'zod';
+
+const uuidParam = z.string().uuid();
 
 export async function GET(
   _request: NextRequest,
@@ -13,6 +16,10 @@ export async function GET(
   }
 
   const { id } = await params;
+  const idValidation = uuidParam.safeParse(id);
+  if (!idValidation.success) {
+    return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+  }
 
   const products = await query(`
     SELECT p.id, p.name, p.description, p.price, p.category, p.featured, p.new_arrival AS "newArrival"
@@ -53,6 +60,11 @@ export async function PUT(
   }
 
   const { id } = await params;
+  const idValidation = uuidParam.safeParse(id);
+  if (!idValidation.success) {
+    return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+  }
+
   const body = await request.json();
   const validation = productSchema.safeParse(body);
 
@@ -100,6 +112,11 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const idValidation = uuidParam.safeParse(id);
+  if (!idValidation.success) {
+    return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+  }
+
   await query(`DELETE FROM products WHERE id = $1`, [id]);
 
   return NextResponse.json({ message: 'Product deleted' });

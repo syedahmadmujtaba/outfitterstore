@@ -23,16 +23,14 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      setTimeout(() => setIsMobileMenuOpen(false), 0);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href));
+
   const navLinks = [
-    { name: 'Shop All', href: '/products' },
     { name: 'Shirts', href: '/products/shirts' },
-    { name: 'Shoes', href: '/products/shoes' },
+    { name: 'Track Orders', href: '/order/track' },
   ];
 
   return (
@@ -57,7 +55,7 @@ export function Navbar() {
                   key={link.name} 
                   href={link.href}
                   className={`transition-opacity hover:opacity-100 ${
-                    pathname === link.href ? 'border-b border-black opacity-100' : 'opacity-50'
+                    isActive(link.href) ? 'border-b border-black opacity-100' : 'opacity-50'
                   }`}
                 >
                   {link.name}
@@ -106,13 +104,18 @@ export function Navbar() {
         </div>
       </header>
 
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
+        </div>
+      )}
       <div 
-        className={`fixed inset-0 bg-white z-50 flex flex-col min-h-screen transform transition-transform duration-300 lg:hidden ${
+        className={`fixed top-0 left-0 z-50 w-72 max-w-[80vw] bg-white h-full shadow-xl flex flex-col transform transition-transform duration-300 lg:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-black/10">
-          <Link href="/" className="font-display font-bold text-2xl tracking-tighter uppercase">
+          <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="font-display font-bold text-2xl tracking-tighter uppercase">
             MENACE
           </Link>
           <button 
@@ -127,7 +130,10 @@ export function Navbar() {
             <Link 
               key={link.name} 
               href={link.href}
-              className="text-[12px] font-bold tracking-[0.2em] text-[#1a1a1a] uppercase"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`text-[12px] font-bold tracking-[0.2em] uppercase ${
+                isActive(link.href) ? 'text-[#1a1a1a] underline underline-offset-4' : 'text-gray-500'
+              }`}
             >
               {link.name}
             </Link>
@@ -136,17 +142,17 @@ export function Navbar() {
         <div className="mt-auto p-6 flex flex-col gap-4 border-t border-black/10">
           {session?.user ? (
             <button 
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={() => { setIsMobileMenuOpen(false); signOut({ callbackUrl: '/' }); }}
               className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]"
             >
               Logout
             </button>
           ) : (
-            <Link href="/login" className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
               <User className="w-4 h-4" /> Account
             </Link>
           )}
-          <Link href="/search" className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
+          <Link href="/search" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-[12px] font-bold tracking-[0.2em] uppercase text-[#1a1a1a]">
             <Search className="w-4 h-4" /> Search
           </Link>
         </div>

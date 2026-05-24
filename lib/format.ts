@@ -8,7 +8,7 @@ export function formatProduct(p: any) {
     price: parseFloat(p.price),
     category: p.category,
     featured: p.featured,
-    newArrival: p.new_arrival,
+    newArrival: p.newArrival,
     images: (p.images || [])
     .filter((img: any) => img && img.url)
     .map((img: any) => ({

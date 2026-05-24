@@ -29,17 +29,27 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
   const [selectedSize, setSelectedSize] = useState<string>(sizes[0] || '');
   const [selectedColor, setSelectedColor] = useState<string>(colors[0] || '');
+  const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
   const [added, setAdded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  const selectedVariant = product.variants?.find(
+    v => v.size === selectedSize && v.color === selectedColor
+  );
+  const currentStock = selectedVariant?.stock || 0;
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
       setError('Please select a size and color.');
       return;
     }
+    if (currentStock === 0) {
+      setError('This variant is out of stock.');
+      return;
+    }
     setError('');
-    addItem(product, selectedSize, selectedColor, 1);
+    addItem(product, selectedSize, selectedColor, quantity);
     setAdded(true);
     setIsCartOpen(true);
     setTimeout(() => setAdded(false), 2000);
@@ -50,11 +60,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   };
 
   const imageUrls = product.images?.filter(img => img.url).map(img => img.url) || [];
-  const displayImages = imageUrls.length > 0 ? [...imageUrls, ...imageUrls, ...imageUrls].slice(0, 4) : [];
+  const displayImages = imageUrls.length > 0 ? imageUrls : [];
 
   return (
     <div className="w-full">
-      <div className="flex flex-col lg:flex-row min-h-screen">
+      <div className="flex flex-col lg:flex-row">
         <div className="w-full lg:w-[65%] xl:w-[70%]">
           {displayImages.length > 0 ? (
             <div className="grid grid-cols-2 gap-1 p-1">
@@ -110,13 +120,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-600">Select Size</span>
-                <button className="text-[10px] font-semibold underline uppercase tracking-widest text-[#1a1a1a]">Size Guide</button>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-4">
                 {displaySizes.map((displaySize, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedSize(sizes[idx])}
+                    onClick={() => { setSelectedSize(sizes[idx]); setQuantity(1); }}
                     className={`text-[12px] uppercase transition-all ${
                       selectedSize === sizes[idx]
                         ? 'text-[#1a1a1a] font-bold underline underline-offset-4'
@@ -127,16 +136,44 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   </button>
                 ))}
               </div>
+              {currentStock > 0 && currentStock <= 5 && (
+                <p className="text-[10px] text-red-600 font-semibold uppercase tracking-widest mt-2">Only {currentStock} left</p>
+              )}
+              {currentStock === 0 && selectedSize && selectedColor && (
+                <p className="text-[10px] text-red-600 font-semibold uppercase tracking-widest mt-2">Out of stock</p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-600">Quantity</span>
+              <div className="flex items-center gap-3 border border-black/10 px-3 py-2">
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="text-gray-500 hover:text-black transition-colors disabled:opacity-30"
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-sm font-bold w-6 text-center">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(q => Math.min(currentStock || 99, q + 1))}
+                  className="text-gray-500 hover:text-black transition-colors disabled:opacity-30"
+                  disabled={quantity >= (currentStock || 99)}
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
             </div>
 
             <button 
               onClick={handleAddToCart}
+              disabled={currentStock === 0}
               className={`w-full text-white px-6 py-4 font-bold uppercase tracking-[0.1em] text-[12px] transition-all flex items-center justify-between ${
-                added ? 'bg-green-600 hover:bg-green-700' : 'bg-[#1a1a1a] hover:bg-black'
+                added ? 'bg-green-600 hover:bg-green-700' : currentStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1a1a1a] hover:bg-black'
               }`}
             >
-              <span>{added ? 'Added to Cart ✓' : 'Add to Cart'}</span>
-              {!added && <ShoppingBag className="w-5 h-5 stroke-[1.5]" />}
+              <span>{added ? 'Added to Cart ✓' : currentStock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+              {!added && currentStock > 0 && <ShoppingBag className="w-5 h-5 stroke-[1.5]" />}
             </button>
             {error && <p className="text-red-500 text-xs font-semibold uppercase tracking-widest mt-2">{error}</p>}
 
@@ -149,9 +186,49 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
             <div className="border-t border-black/10">
               {[
-                { id: 'size', title: 'Size Guide', content: 'Detailed measurements and sizing information.' },
-                { id: 'details', title: 'Product Details & Composition', content: 'Material details, care instructions, and manufacturing info.' },
-                { id: 'delivery', title: 'Deliveries & Returns', content: 'Free standard shipping on orders over PKR 15,000. 30-day return policy.' }
+                { id: 'size', title: 'Size Guide', content: (
+                  <div className="text-xs text-gray-500">
+                    <div className="flex gap-4 mb-3">
+                      {['S', 'M', 'L', 'XL', 'XXL'].map(s => (
+                        <button
+                          key={s}
+                          onClick={() => { setSelectedSize(s); setQuantity(1); }}
+                          className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider border ${
+                            selectedSize === s ? 'border-black bg-black text-white' : 'border-black/10 hover:border-black/30'
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="border-b border-black/10 text-[10px] uppercase tracking-widest text-gray-400">
+                          <th className="pb-1 pr-4">Measurement</th>
+                          <th className="pb-1 pr-4">CM</th>
+                          <th className="pb-1">INCH</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-[11px]">
+                        {[
+                          { label: 'Body Length', cm: '67', inch: '27' },
+                          { label: 'Chest Width', cm: '52', inch: '21' },
+                          { label: 'Across Shoulder', cm: '48', inch: '19' },
+                          { label: 'Sleeve Length', cm: '21', inch: '9' },
+                        ].map(row => (
+                          <tr key={row.label} className="border-b border-black/5">
+                            <td className="py-1.5 pr-4 font-medium text-gray-600">{row.label}</td>
+                            <td className="py-1.5 pr-4">{row.cm}</td>
+                            <td className="py-1.5">{row.inch}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="text-[10px] text-gray-400 mt-2">Measurements are for size M. Other sizes scale proportionally.</p>
+                  </div>
+                )},
+                { id: 'details', title: 'Product Details & Composition', content: <p className="text-xs text-gray-500 leading-relaxed">Material details, care instructions, and manufacturing info.</p> },
+                { id: 'delivery', title: 'Deliveries & Returns', content: <p className="text-xs text-gray-500 leading-relaxed">Free standard shipping on orders over PKR 15,000. 30-day return policy.</p> }
               ].map(section => (
                 <div key={section.id} className="border-b border-black/10">
                   <button 
@@ -165,10 +242,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                       {section.title}
                     </span>
                   </button>
-                  <div className={`overflow-hidden transition-all duration-300 ${expandedSection === section.id ? 'max-h-40 pb-4 pl-8' : 'max-h-0'}`}>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {section.content}
-                    </p>
+                  <div className={`overflow-hidden transition-all duration-300 ${expandedSection === section.id ? 'max-h-80 pb-4 pl-8' : 'max-h-0'}`}>
+                    {section.content}
                   </div>
                 </div>
               ))}

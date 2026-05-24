@@ -8,7 +8,7 @@ interface OrderStatusEmailProps {
   trackingUrl: string;
 }
 
-export function OrderStatusEmail({ orderNumber, customerName, newStatus, trackingUrl }: OrderStatusEmailProps) {
+export function OrderStatusEmail({ orderNumber, customerName, oldStatus, newStatus, trackingUrl }: OrderStatusEmailProps) {
   return (
     <Html>
       <Head />
@@ -19,7 +19,7 @@ export function OrderStatusEmail({ orderNumber, customerName, newStatus, trackin
             Hi {customerName},
           </Text>
           <Text style={text}>
-            Your order <strong>#{orderNumber}</strong> status has been updated to <strong>{newStatus.toUpperCase()}</strong>.
+            Your order <strong>#{orderNumber}</strong> status has been updated from <strong>{oldStatus.toUpperCase()}</strong> to <strong>{newStatus.toUpperCase()}</strong>.
           </Text>
           {newStatus === 'shipped' && (
             <Text style={text}>

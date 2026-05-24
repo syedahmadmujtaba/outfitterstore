@@ -21,8 +21,8 @@ export default function NewProductPage() {
       return;
     }
 
-    if (file.size > 100 * 1024 * 1024) {
-      setError('File size must be under 100MB');
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size must be under 10MB');
       return;
     }
 

@@ -36,12 +36,15 @@ export default function TrackOrderPage() {
         <div className="bg-[#fbfbfb] border border-black/10 p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</span>
-            <span className="text-sm font-bold uppercase tracking-widest">
-              {order.status === 'pending' && '🟡 Pending'}
-              {order.status === 'confirmed' && '🟢 Confirmed'}
-              {order.status === 'shipped' && '🔵 Shipped'}
-              {order.status === 'delivered' && '✅ Delivered'}
-              {order.status === 'cancelled' && '❌ Cancelled'}
+            <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 ${
+              order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+              order.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+              order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+              order.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
+              order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {order.status}
             </span>
           </div>
 

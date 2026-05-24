@@ -3,24 +3,31 @@ import { query } from '@/lib/db';
 import { formatProduct } from '@/lib/format';
 import { ProductCard } from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
+import SortDropdown from '../SortDropdown';
 
 export function generateStaticParams() {
   return [
     { category: 'shirts' },
-    { category: 'shoes' },
     { category: 'accessories' },
   ];
 }
 
-export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+export default async function CategoryPage({ 
+  params,
+  searchParams,
+}: { 
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ sort?: string }>;
+}) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const category = resolvedParams.category;
   
-  if (!['shirts', 'shoes', 'accessories'].includes(category)) {
+  if (!['shirts', 'accessories'].includes(category)) {
     notFound();
   }
 
-  const products = await query(`
+  let sqlQuery = `
     SELECT
       p.id,
       p.name,
@@ -50,8 +57,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     LEFT JOIN product_variants pv ON pv.product_id = p.id
     WHERE p.category = $1
     GROUP BY p.id
-    ORDER BY p.created_at DESC
-  `, [category]);
+  `;
+
+  const sort = resolvedSearchParams.sort;
+  if (sort === 'price-asc') sqlQuery += ` ORDER BY p.price ASC`;
+  else if (sort === 'price-desc') sqlQuery += ` ORDER BY p.price DESC`;
+  else sqlQuery += ` ORDER BY p.created_at DESC`;
+
+  const products = await query(sqlQuery, [category]);
 
   const formattedProducts = products.map(formatProduct);
 
@@ -64,21 +77,27 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         <p className="text-gray-500 max-w-xl text-sm leading-relaxed">
           {category === 'shirts' 
             ? 'Definitive tops designed for layering and pure statement.'
-            : category === 'shoes'
-            ? 'Footwear built from the ground up to redefine your silhouette.'
             : 'Essential accessories to complete your look.'}
         </p>
       </div>
 
       <div className="flex justify-between items-end mb-12 pb-4 border-b border-black/10">
         <span className="text-[10px] uppercase tracking-widest text-[#1a1a1a] font-bold">{formattedProducts.length} Products</span>
+        <SortDropdown defaultSort={sort || 'newest'} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-        {formattedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {formattedProducts.length === 0 ? (
+        <div className="text-center py-32">
+          <p className="text-[11px] uppercase tracking-[0.15em] text-gray-400 font-medium">No products found</p>
+          <p className="text-[10px] text-gray-300 mt-2">Try adjusting your filters.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+          {formattedProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
