@@ -3,11 +3,16 @@ import { OrderConfirmationEmail } from './templates/OrderConfirmationEmail';
 import { OrderStatusEmail } from './templates/OrderStatusEmail';
 import { NewOrderEmail } from './templates/NewOrderEmail';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not set');
+if (!process.env.EMAIL_FROM) throw new Error('EMAIL_FROM is not set');
+if (!process.env.ADMIN_EMAIL) throw new Error('ADMIN_EMAIL is not set');
+if (!process.env.APP_URL) throw new Error('APP_URL is not set');
 
-const FROM_EMAIL = `Menace <${process.env.EMAIL_FROM || 'onboarding@resend.dev'}>`;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@yourdomain.com';
-const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const FROM_EMAIL = `Menace <${process.env.EMAIL_FROM}>`;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const APP_URL = process.env.APP_URL;
 
 interface SendOrderConfirmationParams {
   to: string;
@@ -19,11 +24,6 @@ interface SendOrderConfirmationParams {
 }
 
 export async function sendOrderConfirmation({ to, name, orderNumber, items, total, orderId }: SendOrderConfirmationParams) {
-  if (!resend) {
-    console.warn('Email service not configured - RESEND_API_KEY missing');
-    return;
-  }
-
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
@@ -38,7 +38,6 @@ export async function sendOrderConfirmation({ to, name, orderNumber, items, tota
   });
 
   if (error) {
-    console.error('Resend error (sendOrderConfirmation):', error);
     throw new Error(error.message);
   }
 
@@ -55,11 +54,6 @@ interface SendOrderStatusParams {
 }
 
 export async function sendOrderStatus({ to, name, orderNumber, oldStatus, newStatus, orderId }: SendOrderStatusParams) {
-  if (!resend) {
-    console.warn('Email service not configured - RESEND_API_KEY missing');
-    return;
-  }
-
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
@@ -74,7 +68,6 @@ export async function sendOrderStatus({ to, name, orderNumber, oldStatus, newSta
   });
 
   if (error) {
-    console.error('Resend error (sendOrderStatus):', error);
     throw new Error(error.message);
   }
 
@@ -90,11 +83,6 @@ interface SendNewOrderParams {
 }
 
 export async function sendNewOrderNotification({ orderNumber, email, items, total, orderId }: SendNewOrderParams) {
-  if (!resend) {
-    console.warn('Email service not configured - RESEND_API_KEY missing');
-    return;
-  }
-
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_EMAIL,
@@ -109,7 +97,6 @@ export async function sendNewOrderNotification({ orderNumber, email, items, tota
   });
 
   if (error) {
-    console.error('Resend error (sendNewOrderNotification):', error);
     throw new Error(error.message);
   }
 
