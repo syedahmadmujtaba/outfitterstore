@@ -5,7 +5,8 @@ export default async function AdminProducts() {
   const products = await query(`
     SELECT p.id, p.name, p.category, p.price, p.featured, p.new_arrival AS "newArrival",
            (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id = p.id) AS image_count,
-           (SELECT COUNT(*) FROM product_variants pv WHERE pv.product_id = p.id) AS variant_count
+           (SELECT COUNT(*) FROM product_variants pv WHERE pv.product_id = p.id) AS variant_count,
+           (SELECT COALESCE(SUM(pv2.stock), 0) FROM product_variants pv2 WHERE pv2.product_id = p.id) AS total_stock
     FROM products p
     ORDER BY p.created_at DESC
   `);
@@ -26,7 +27,7 @@ export default async function AdminProducts() {
               <th className="px-4 py-3 font-bold">Name</th>
               <th className="px-4 py-3 font-bold">Category</th>
               <th className="px-4 py-3 font-bold">Price</th>
-              <th className="px-4 py-3 font-bold">Images</th>
+              <th className="px-4 py-3 font-bold">Stock</th>
               <th className="px-4 py-3 font-bold">Variants</th>
               <th className="px-4 py-3 font-bold">Status</th>
               <th className="px-4 py-3 font-bold text-right">Actions</th>
@@ -38,7 +39,7 @@ export default async function AdminProducts() {
                 <td className="px-4 py-3 text-sm font-medium">{p.name}</td>
                 <td className="px-4 py-3 text-sm capitalize">{p.category}</td>
                 <td className="px-4 py-3 text-sm">PKR {parseFloat(p.price).toLocaleString()}</td>
-                <td className="px-4 py-3 text-sm">{p.image_count}</td>
+                <td className={`px-4 py-3 text-sm font-bold ${p.total_stock === 0 ? 'text-red-600' : p.total_stock <= 10 ? 'text-orange-600' : ''}`}>{p.total_stock}</td>
                 <td className="px-4 py-3 text-sm">{p.variant_count}</td>
                 <td className="px-4 py-3 text-sm">
                   {p.featured && <span className="text-[9px] uppercase tracking-widest bg-black/5 px-2 py-1 mr-1">Featured</span>}
