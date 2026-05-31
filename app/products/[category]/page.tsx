@@ -5,6 +5,8 @@ import { ProductCard } from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import SortDropdown from '../SortDropdown';
 
+export const dynamic = 'force-dynamic';
+
 export function generateStaticParams() {
   return [
     { category: 'shirts' },

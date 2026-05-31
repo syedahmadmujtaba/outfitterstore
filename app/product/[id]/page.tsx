@@ -3,10 +3,6 @@ import { query } from '@/lib/db';
 import { formatProduct } from '@/lib/format';
 import ProductDetailClient from './ProductDetailClient';
 
-export function generateStaticParams() {
-  return [];
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const products = await query(`SELECT name, description FROM products WHERE id = $1`, [id]);
