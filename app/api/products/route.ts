@@ -85,12 +85,15 @@ export async function GET(request: NextRequest) {
           'id', pv.id,
           'size', pv.size,
           'color', pv.color,
+          'colorId', pv.color_id,
+          'hex', c.hex,
           'stock', pv.stock
         )
       ) FILTER (WHERE pv.id IS NOT NULL) AS variants
     FROM products p
     LEFT JOIN product_images pi ON pi.product_id = p.id
     LEFT JOIN product_variants pv ON pv.product_id = p.id
+    LEFT JOIN colors c ON c.id = pv.color_id
     ${whereClause}
     GROUP BY p.id
     ORDER BY ${orderBy}

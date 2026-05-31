@@ -12,8 +12,9 @@ export const productSchema = z.object({
     publicId: z.string().optional(),
   })).min(1),
   variants: z.array(z.object({
-    size: z.enum(['S', 'M', 'L', 'XL']),
+    size: z.string().min(1),
     color: z.string().min(1),
+    colorId: z.string().uuid().optional(),
     stock: z.number().int().min(0).default(0),
   })).min(1),
 });

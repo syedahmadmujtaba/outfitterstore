@@ -37,6 +37,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               </a>
             </li>
             <li>
+              <a href="/admin/colors" className="block px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                Colors
+              </a>
+            </li>
+            <li>
               <a href="/admin/settings" className="block px-3 py-2 text-[11px] uppercase tracking-widest font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
                 Settings
               </a>

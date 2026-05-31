@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
 
   if (variants && variants.length > 0) {
     for (const v of variants) {
+      const colorId = v.colorId || null;
       await query(
-        `INSERT INTO product_variants (product_id, size, color, stock) VALUES ($1, $2, $3, $4)`,
-        [productId, v.size, v.color, v.stock || 0]
+        `INSERT INTO product_variants (product_id, size, color, color_id, stock) VALUES ($1, $2, $3, $4, $5)`,
+        [productId, v.size, v.color, colorId, v.stock || 0]
       );
     }
   }

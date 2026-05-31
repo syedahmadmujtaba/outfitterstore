@@ -36,7 +36,10 @@ export async function GET(
   );
 
   const variants = await query(
-    `SELECT id, size, color, stock FROM product_variants WHERE product_id = $1`,
+    `SELECT pv.id, pv.size, pv.color, pv.color_id AS "colorId", pv.stock, c.hex
+     FROM product_variants pv
+     LEFT JOIN colors c ON c.id = pv.color_id
+     WHERE pv.product_id = $1`,
     [id]
   );
 
@@ -92,9 +95,10 @@ export async function PUT(
   await query(`DELETE FROM product_variants WHERE product_id = $1`, [id]);
   if (variants && variants.length > 0) {
     for (const v of variants) {
+      const colorId = v.colorId || null;
       await query(
-        `INSERT INTO product_variants (product_id, size, color, stock) VALUES ($1, $2, $3, $4)`,
-        [id, v.size, v.color, v.stock || 0]
+        `INSERT INTO product_variants (product_id, size, color, color_id, stock) VALUES ($1, $2, $3, $4, $5)`,
+        [id, v.size, v.color, colorId, v.stock || 0]
       );
     }
   }

@@ -17,25 +17,39 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
   const { addItem, setIsCartOpen } = useCart();
 
-  const sizes = [...new Set(product.variants?.map(v => v.size) || [])];
-  const colors = [...new Set(product.variants?.map(v => v.color) || [])];
+  const variants = product.variants || [];
+
+  const sizes = [...new Set(variants.map(v => v.size))];
+
+  const colors = [...new Map(
+    variants.map(v => [v.color.trim().toLowerCase(), v.color.trim()])
+  ).values()];
 
   const normalizeSize = (s: string) => {
     const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
-    return map[s.toLowerCase()] || s;
+    return map[s.toLowerCase().trim()] || s.trim();
   };
 
   const displaySizes = sizes.map(normalizeSize);
 
-  const [selectedSize, setSelectedSize] = useState<string>(sizes[0] || '');
-  const [selectedColor, setSelectedColor] = useState<string>(colors[0] || '');
+  const colorMap: Record<string, string> = {};
+  variants.forEach(v => { if (v.color && v.hex) colorMap[v.color.trim().toLowerCase()] = v.hex; });
+  const getHex = (color: string) => colorMap[color.trim().toLowerCase()] || getColorHex(color);
+
+  const firstInStock = variants.find(v => v.stock > 0);
+  const defaultSize = firstInStock ? firstInStock.size : (sizes[0] || '');
+  const defaultColor = firstInStock ? firstInStock.color : (colors[0] || '');
+
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
+  const [selectedColor, setSelectedColor] = useState<string>(defaultColor);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
   const [added, setAdded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  const selectedVariant = product.variants?.find(
-    v => v.size === selectedSize && v.color === selectedColor
+  const selectedVariant = variants.find(
+    v => v.size.trim().toLowerCase() === selectedSize.trim().toLowerCase()
+      && v.color.trim().toLowerCase() === selectedColor.trim().toLowerCase()
   );
   const currentStock = selectedVariant?.stock || 0;
 
@@ -109,7 +123,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                         ? 'ring-1 ring-black ring-offset-2 border-black/20' 
                         : 'border-black/10 hover:border-black/30'
                     }`}
-                    style={{ backgroundColor: getColorHex(color) }}
+                    style={{ backgroundColor: getHex(color) }}
                     title={color}
                     aria-label={`Select ${color} color`}
                   />

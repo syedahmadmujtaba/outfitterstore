@@ -11,6 +11,8 @@ export interface ProductVariant {
   id: string;
   size: string;
   color: string;
+  colorId?: string;
+  hex?: string;
   stock: number;
 }
 

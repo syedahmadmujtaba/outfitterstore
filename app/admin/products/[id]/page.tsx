@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { uploadToCloudinary } from '@/lib/cloudinary-upload';
 
+interface PaletteColor {
+  id: string;
+  name: string;
+  hex: string;
+}
+
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
@@ -13,7 +19,8 @@ export default function EditProductPage() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [images, setImages] = useState<{ url: string; publicId?: string }[]>([]);
-  const [variants, setVariants] = useState<{ size: string; color: string; stock: number }[]>([]);
+  const [variants, setVariants] = useState<{ size: string; color: string; colorId?: string; stock: number; hex?: string }[]>([]);
+  const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -26,26 +33,28 @@ export default function EditProductPage() {
   });
 
   useEffect(() => {
-    fetch(`/api/admin/products/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        const p = data.data;
-        setFormData({
-          name: p.name,
-          description: p.description,
-          price: p.price.toString(),
-          category: p.category,
-          featured: p.featured,
-          newArrival: p.newArrival,
-        });
-        setImages(p.images || []);
-        const normalizeSize = (s: string) => {
-          const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
-          return map[s.toLowerCase()] || s;
-        };
-        setVariants((p.variants || []).map((v: any) => ({ ...v, size: normalizeSize(v.size) })));
-        setFetching(false);
+    Promise.all([
+      fetch(`/api/admin/products/${id}`).then(r => r.json()),
+      fetch('/api/admin/colors').then(r => r.json()),
+    ]).then(([productRes, colorsRes]) => {
+      const p = productRes.data;
+      setPalette(colorsRes.data || []);
+      setFormData({
+        name: p.name,
+        description: p.description,
+        price: p.price.toString(),
+        category: p.category,
+        featured: p.featured,
+        newArrival: p.newArrival,
       });
+      setImages(p.images || []);
+      const normalizeSize = (s: string) => {
+        const map: Record<string, string> = { small: 'S', medium: 'M', large: 'L', 'extra large': 'XL', 'extra-large': 'XL', extralarge: 'XL' };
+        return map[s.toLowerCase()] || s;
+      };
+      setVariants((p.variants || []).map((v: any) => ({ ...v, size: normalizeSize(v.size) })));
+      setFetching(false);
+    });
   }, [id]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +91,12 @@ export default function EditProductPage() {
 
   const updateVariant = (index: number, field: string, value: string | number) => {
     setVariants(prev => prev.map((v, i) => i === index ? { ...v, [field]: value } : v));
+  };
+
+  const selectColor = (index: number, colorId: string) => {
+    const c = palette.find(p => p.id === colorId);
+    if (!c) return;
+    setVariants(prev => prev.map((v, i) => i === index ? { ...v, colorId: c.id, color: c.name, hex: c.hex } : v));
   };
 
   const removeVariant = (index: number) => setVariants(prev => prev.filter((_, i) => i !== index));
@@ -217,8 +232,30 @@ export default function EditProductPage() {
                 <option value="M">M</option>
                 <option value="L">L</option>
                 <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
               </select>
-              <input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-24 focus:border-black outline-none" />
+              {palette.length > 0 ? (
+                <div className="relative w-40">
+                  <select
+                    value={v.colorId || ''}
+                    onChange={e => selectColor(i, e.target.value)}
+                    className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-full focus:border-black outline-none appearance-none pl-8"
+                  >
+                    <option value="">Select color</option>
+                    {palette.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {v.hex && (
+                    <div
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border border-black/10"
+                      style={{ backgroundColor: v.hex }}
+                    />
+                  )}
+                </div>
+              ) : (
+                <input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-24 focus:border-black outline-none" />
+              )}
               <input type="number" placeholder="Stock" value={v.stock} onChange={e => updateVariant(i, 'stock', parseInt(e.target.value) || 0)} className="border border-black/10 bg-[#fbfbfb] p-2 text-sm w-20 focus:border-black outline-none" />
               <button type="button" onClick={() => removeVariant(i)} className="text-red-500 text-sm">×</button>
             </div>
