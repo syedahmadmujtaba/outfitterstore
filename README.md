@@ -53,6 +53,7 @@ RESEND_API_KEY=...
 EMAIL_FROM=noreply@yourdomain.com
 ADMIN_EMAIL=admin@yourdomain.com
 AUTH_SECRET=your-secret-here
+App_URL=http://localhost:3000
 ```
 
 ### Database Setup
